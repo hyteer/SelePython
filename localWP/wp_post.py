@@ -6,21 +6,40 @@ from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoAlertPresentException
 import unittest, time, re
+import random
+import string
+import random
 
-class SimpleGoogle(unittest.TestCase):
+g = lambda a, b : "".join(random.sample(string.letters, a)) + "".join(random.sample(string.digits, b))
+
+randomTxt = g(5,9)
+print randomTxt
+
+class WpPost(unittest.TestCase):
     def setUp(self):
         self.driver = webdriver.Firefox()
-        self.driver.implicitly_wait(5)
-        self.base_url = "https://www.google.com/"
+        self.driver.implicitly_wait(8)
+        self.base_url = "http://localhost/wp"
         self.verificationErrors = []
         self.accept_next_alert = True
     
-    def test_simple_google(self):
+    def test_wp_post(self):
         driver = self.driver
-        driver.get(self.base_url + "/?gws_rd=ssl")
-        driver.find_element_by_id("lst-ib").clear()
-        driver.find_element_by_id("lst-ib").send_keys("github")
-        driver.find_element_by_link_text(u"How people build software · GitHub").click()
+        driver.get(self.base_url + "/wp/")
+        driver.find_element_by_name("s").clear()
+        driver.find_element_by_name("s").send_keys("test")
+        driver.find_element_by_css_selector("button.search-submit").click()
+        driver.find_elements_by_class_name("more-link")[0].click()
+        driver.find_element_by_id("comment").clear()
+        driver.find_element_by_id("comment").send_keys(randomTxt)
+        author = driver.find_element_by_id("author")
+        email = driver.find_element_by_id("email")
+        author.clear()
+        email.clear()
+        author.send_keys(randomTxt)
+        email.send_keys(randomTxt + "@qq.com")
+
+        driver.find_element_by_id("submit").click()
     
     def is_element_present(self, how, what):
         try: self.driver.find_element(by=how, value=what)
@@ -44,7 +63,7 @@ class SimpleGoogle(unittest.TestCase):
         finally: self.accept_next_alert = True
     
     def tearDown(self):
-      #  self.driver.quit()
+     #   self.driver.quit()
         self.assertEqual([], self.verificationErrors)
 
 if __name__ == "__main__":
